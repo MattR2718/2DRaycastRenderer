@@ -65,7 +65,7 @@ void Raycast::initRays()
 		r.m = (r.origin.y - r.point.y) / (r.origin.x - r.point.x);
 		//y= mx + c
 		//c = y - mx
-		r.c = r.origin.y = r.m * r.origin.x;
+		r.c = r.origin.y - r.m * r.origin.x;
 	}
 }
 
