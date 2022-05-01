@@ -3,7 +3,7 @@
 
 //Fps counter
 float fps;
-sf::Clock fps_clock = sf::Clock::Clock();
+sf::Clock fps_clock = sf::Clock();
 sf::Time previous_time = fps_clock.getElapsedTime();
 sf::Time current_time;
 

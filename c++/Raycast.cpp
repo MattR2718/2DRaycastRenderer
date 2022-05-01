@@ -9,7 +9,7 @@ void Raycast::initVariables()
 	this->MOVEMENT_SPEED = 200.f;
 
 	this->font;
-	if (!font.loadFromFile("arial.ttf"))
+	if (!font.loadFromFile("../../c++/arial.ttf"))
 	{
 		// error...
 	}
@@ -71,7 +71,7 @@ void Raycast::initRays()
 
 void Raycast::loadGrid()
 {
-	std::ifstream file("grid.txt");
+	std::ifstream file("../../c++/grid.txt");
 	std::string linetxt;
 	int y = 0;
 	while (std::getline(file, linetxt)) {
@@ -196,7 +196,7 @@ void Raycast::update_rays()
 		r.point = this->rotate_rays(r.origin, r.point, r.angle);
 
 		r.m = (r.origin.y - r.point.y) / (r.origin.x - r.point.x);
-		if (r.m == 0 || isinf(r.m)) {
+		if (r.m == 0 || std::isinf(r.m)) {
 			r.m = 0.0001;
 		}
 		r.c = r.origin.y - r.m * r.origin.x;
