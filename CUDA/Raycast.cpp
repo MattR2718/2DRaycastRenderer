@@ -29,6 +29,11 @@ void Raycast::update(){
     int n = (sizeof(this->rays)/sizeof(*this->rays));
     rotateRays(n, rays);
     //rotateRaysCPU(n, rays);
+    int N = sizeof(this->grid) / sizeof(*this->grid);
+    getCollisionDistance(N, n, this->BLOCKSIZE, this->rays, this->grid, this->collisions);
+    //for (int i = 0; i < n; i++){
+    //    this->collisions[i] = i + 20.0;
+    //}
 }
 
 void Raycast::render(){
@@ -205,4 +210,18 @@ void Raycast::displayFPS(){
     text.setFillColor(sf::Color::Black);
     text.setPosition(sf::Vector2f(0, 0));
     this->window->draw(text);
+}
+
+std::vector<float> Raycast::getCollisions(){
+    std::vector<float> t;
+    for (auto& c : this->collisions){ t.push_back(c); }
+    return t;
+}
+
+float Raycast::getDegStep(){
+    return this->DEGSTEP;
+}
+
+float Raycast::getConeAngle(){
+    return this->CONEANGLE;
 }

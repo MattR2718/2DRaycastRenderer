@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <fstream>
+#include <vector>
 #include <iostream>
 
 #include "kernel.cuh"
@@ -24,6 +25,9 @@ class Raycast{
         void update();
         void render();
 
+        std::vector<float> getCollisions();
+        float getDegStep();
+        float getConeAngle();
         
 
     private:
@@ -40,7 +44,7 @@ class Raycast{
 
         bool grid[(WIDTH / BLOCKSIZE) * (HEIGHT / BLOCKSIZE)];
 
-        int collisions[((WIDTH / BLOCKSIZE) * (HEIGHT / BLOCKSIZE)) * 2];
+        
 
         sf::Vector2i mouse_pos;
 
@@ -58,6 +62,7 @@ class Raycast{
         constexpr static float CONEANGLE = 120.0;
         constexpr static float DEGSTEP = 1.5;
         Ray rays[(int)(CONEANGLE / DEGSTEP)];
+        float collisions[(int)(CONEANGLE / DEGSTEP)];
 
         void initWindow();
         constexpr void initGrid();

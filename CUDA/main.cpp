@@ -9,6 +9,7 @@ sf::Time cur;
 
 int main(){ 
     Raycast raycast;
+    Render render;
 
     while (raycast.running()){
 
@@ -18,6 +19,11 @@ int main(){
 
         raycast.update();
         raycast.render();
+        render.update();
+        render.collisions = raycast.getCollisions();
+        render.DEGSTEP = raycast.getDegStep();
+        render.CONEANGLE = raycast.getConeAngle();
+        render.render();
 
     }
 }
