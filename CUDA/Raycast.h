@@ -14,6 +14,8 @@ class Raycast{
         sf::RenderWindow* window;
         sf::VideoMode videoMode;
 
+        int fps;
+
         Raycast();
         virtual ~Raycast();
 
@@ -29,7 +31,7 @@ class Raycast{
         sf::Font font;
 
         constexpr static int BLOCKSIZE = 20;
-        constexpr static float MOVEMENTSPEED = 10.0;
+        constexpr static float MOVEMENTSPEED = 100.0;
         constexpr static bool LOADGRID = true;
 
         constexpr static int WIDTH = 800;
@@ -37,11 +39,16 @@ class Raycast{
 
 
         bool grid[(WIDTH / BLOCKSIZE) * (HEIGHT / BLOCKSIZE)];
+
+        int collisions[((WIDTH / BLOCKSIZE) * (HEIGHT / BLOCKSIZE)) * 2];
+
         sf::Vector2i mouse_pos;
 
         sf::RectangleShape player;
 
-        sf::Clock delta_clock;
+        sf::Clock deltaClock;
+        sf::Time prevTime;
+        sf::Time currentTime;
 
         sf::Color backgroundColour = sf::Color(100, 100, 100, 255);
         sf::Color playerColour = sf::Color::Green;
@@ -63,5 +70,7 @@ class Raycast{
         void getMousePos();
         void updateRays();
         void drawRays();
+        void updatePlayer();
+        void displayFPS();
 };
 #endif

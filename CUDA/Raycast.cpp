@@ -7,6 +7,11 @@ Raycast::Raycast(){
     this->border();
     this->initPlayer();
     this->initRays();
+    this->deltaClock.restart();
+    this->prevTime = this->deltaClock.getElapsedTime();
+    if (!this->font.loadFromFile("../arial.ttf")){
+        
+    }
 }
 
 Raycast::~Raycast(){
@@ -19,6 +24,7 @@ const bool Raycast::running() const{
 
 void Raycast::update(){
     this->pollEvents();
+    this->updatePlayer();
     this->updateRays();
     int n = (sizeof(this->rays)/sizeof(*this->rays));
     rotateRays(n, rays);
@@ -30,6 +36,7 @@ void Raycast::render(){
     this->drawGrid();
     this->window->draw(this->player);
     this->drawRays();
+    this->displayFPS();
     this->window->display();
 }
 
@@ -156,4 +163,46 @@ void Raycast::drawRays(){
         f++;
         this->window->draw(line, 2, sf::Lines);
     }
+}
+
+void Raycast::updatePlayer(){
+    sf::Time dt = this->deltaClock.restart();
+	//Keyboard input
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+		this->player.move(0.f, -this->MOVEMENTSPEED * dt.asSeconds());
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+		this->player.move(0.f, this->MOVEMENTSPEED * dt.asSeconds());
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+		this->player.move(-this->MOVEMENTSPEED * dt.asSeconds(), 0.f);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+		this->player.move(this->MOVEMENTSPEED * dt.asSeconds(), 0.f);
+	}
+
+	//Window bound collision
+	if (this->player.getGlobalBounds().left < 0 + this->BLOCKSIZE) {
+		this->player.move(abs(this->BLOCKSIZE - this->player.getGlobalBounds().left), 0.f);
+	}
+	if (this->player.getGlobalBounds().top < 0 + this->BLOCKSIZE) {
+		this->player.move(0.f, abs(this->BLOCKSIZE - this->player.getGlobalBounds().top));
+	}
+	if (this->player.getGlobalBounds().left + this->player.getGlobalBounds().width > this->videoMode.width - this->BLOCKSIZE) {
+		this->player.move(-((this->player.getGlobalBounds().left + this->player.getGlobalBounds().width) - (this->videoMode.width - this->BLOCKSIZE)), 0.f);
+	}
+	if (this->player.getGlobalBounds().top + this->player.getGlobalBounds().height > this->videoMode.height - this->BLOCKSIZE) {
+		this->player.move(0.f, -((this->player.getGlobalBounds().top + this->player.getGlobalBounds().height) - (this->videoMode.height - this->BLOCKSIZE)));
+	}
+
+}
+
+void Raycast::displayFPS(){
+    sf::Text text;
+    text.setFont(this->font);
+    text.setString(std::to_string(this->fps));
+    text.setCharacterSize(30);
+    text.setFillColor(sf::Color::Black);
+    text.setPosition(sf::Vector2f(0, 0));
+    this->window->draw(text);
 }
