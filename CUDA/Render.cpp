@@ -63,9 +63,9 @@ void Render::floors(){
 
 void Render::walls(){
 
-    for (auto& c : this->collisions){
-        std::cout<<c<<'\n';
-    }
+    //for (auto& c : this->collisions){
+    //    std::cout<<c<<'\n';
+    //}
 
     float center_y = int(this->videomode.height / 2);
     int num = this->collisions.size();

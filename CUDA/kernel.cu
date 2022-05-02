@@ -65,48 +65,100 @@ __device__ float intersection(int ax, int ay, int bx, int by, int cx, int cy, in
     }
 }
 
+__device__ float collidex(int width, Ray r, int bs, bool *grid, int step){
+    int c = r.ox + (bs / 2) * step;
+    int y;
+    bool collided = false;
+    while ((c < ((width - 1) * bs)) && (c > (bs)) && (!collided)){
+        y = round(r.m * c + r.c);
+        int y2 = y / bs;
+        if (grid[width * y2 + c]){ collided = true; }
+        c += step;
+    }
+    return sqrt((float)(y * y) + ((c * bs) * (c * bs)));
+}
 
-__global__ void collisions(int n, int N, int width, int bs, Ray *rays, bool *grid, float *cols){
+__device__ float collidey(int width, int height, Ray r, int bs, bool *grid, int step){
+    int c = r.oy + (bs / 2) * step;
+    int x;
+    bool collided = false;
+    while ((c < ((height - 1) * bs)) && (c > bs) && (!collided)){
+        x = round((c - r.c) / r.m);
+        int x2 = x / bs;
+        if (grid[width * c + x2]){ collided = true; }
+        c += step;
+    }
+    float dist = sqrt((float)(x * x) + ((c * bs) * (c * bs)));
+    printf("%f\n", dist);
+    printf("dhfiosfhgo");
+    return dist;
+}
+
+
+__global__ void collisions(int wGrid, int nRays, int bs, Ray *rays, bool *grid, float *cols){
+    printf("IN KERNEL");
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
-    for (int i = index; i < N; i += stride){
+    for (int i = index; i < nRays; i += stride){
         Ray r = rays[i];
-        float closest = 10000000.0;
-        for (int g = 0; g < n; g++){
-            if(grid[g]){
-                int x = (g % width) * bs;
-                int y = (g / width) * bs;
-                float t = intersection(r.ox, r.oy, r.px, r.py, x, y, x + bs, y);
-                float b = intersection(r.ox, r.oy, r.px, r.py, x, y + bs, x + bs, y + bs);
-                float l = intersection(r.ox, r.oy, r.px, r.py, x, y, x, y + bs);
-                float ri = intersection(r.ox, r.oy, r.px, r.py, x + bs, y, x + bs, y + bs);
-                if (t < closest){ closest = t; }
-                if (b < closest){ closest = b; }
-                if (l < closest){ closest = l; }
-                if (ri < closest){ closest = ri; }
-            }
+        //float closest = 10000000.0;
+        float closestx = 10000000;
+        float closesty = 10000000;
+        if ((r.ox - r.px) > 1){
+            closestx = collidex(wGrid, r, bs, grid, -1);
+        } else{ 
+            closestx = collidex(wGrid, r, bs, grid, 1);
         }
-        cols[i] = closest;
+        int hGrid = (sizeof(grid)/sizeof(*grid))/wGrid;
+        if ((r.oy - r.py) > 1){
+            closesty = collidey(wGrid, hGrid, r, bs, grid, -1);
+        } else{ 
+            closesty = collidey(wGrid, hGrid, r, bs, grid, 1);
+        }
+
+        if (closestx < closesty) { cols[i] = closestx; }
+        else { cols[i] = closesty; }
+        //printf("%f\n", closestx);
+        //printf("hdihfguhfug");
     }
 }
 
-void getCollisionDistance(int& n, int& width, int bs, Ray *rays, bool *grid, float *collis){
-    int N = sizeof(rays) / sizeof(*rays);
+void getCollisionDistance(int wGrid, int bs, int nRays, Ray *rays, bool *grid, float *collis){
+    //int N = sizeof(rays) / sizeof(*rays);
+    int N = nRays;
+    //printf("%d\n", N);
+    
     float *cols;
+    printf("MALLOC COLS\n");
     cudaMallocManaged(&cols, N*sizeof(float));
     Ray *rs;
+    printf("MALLOC RS\n");
     cudaMallocManaged(&rs, N*sizeof(Ray));
+    printf("SET RAYS\n");
     for (int i = 0; i < N ; i++){
         rs[i] = rays[i];
+        cols[i] = 0.0;
     }
+    printf("BLOCKSIZE\n");
     int blockSize = 256;
+    printf("NUMBLOCKS\n");
     int numBlocks = (N + blockSize - 1) / blockSize;
-    collisions<<<numBlocks, blockSize>>>(n, N, width, bs, rs, grid, cols);
+    printf("GOING INTO KERNEL\n");
+    collisions<<<numBlocks, blockSize>>>(wGrid, N, bs, rs, grid, cols);
     cudaDeviceSynchronize();
+    printf("SYNCHRONIZED\n");
+    
+    printf("LOOP\n");
     for (int i = 0; i < N ; i++){
-        cols[i] = collis[i];
+        //collis[i] = cols[i];
+        //collis[i] = 100 + i;
+        //printf("%f\n", cols[i]);
+        collis[i] = 100;
     }
+    printf("OUT OF LOOP\n");
     cudaFree(rs);
+    printf("FREEING\n");
     cudaFree(cols);
-
+    //printf("FREED\n");
+    //printf("odijoidfjgoijog");
 }

@@ -8,6 +8,6 @@
 
 void rotateRays(int& n, Ray *rays);
 void rotateRaysCPU(int& n, Ray *rays);
-void getCollisionDistance(int& n, int& width, int bs, Ray *rays, bool *grid, float *collis);
+void getCollisionDistance(int wGrid, int bs, int nRays, Ray *rays, bool *grid, float *collis);
 
 #endif

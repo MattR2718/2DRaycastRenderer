@@ -30,7 +30,7 @@ void Raycast::update(){
     rotateRays(n, rays);
     //rotateRaysCPU(n, rays);
     int N = sizeof(this->grid) / sizeof(*this->grid);
-    getCollisionDistance(N, n, this->BLOCKSIZE, this->rays, this->grid, this->collisions);
+    getCollisionDistance(this->WIDTH/this->BLOCKSIZE, this->BLOCKSIZE, n, this->rays, this->grid, this->collisions);
     //for (int i = 0; i < n; i++){
     //    this->collisions[i] = i + 20.0;
     //}
