@@ -6,9 +6,12 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 #include "kernel.cuh"
 #include "ray.h"
+
+#define PI 3.14159
 
 class Raycast{
     public:
@@ -73,9 +76,13 @@ class Raycast{
         void drawGrid();
         void loadGrid();
         void getMousePos();
+        float angleBetween(sf::Vector2i mp1, sf::Vector2i mp2, sf::Vector2f pp);
         void updateRays();
+        float degToRad(float& angle);
+        float radToDeg(float& angle);
         void drawRays();
         void updatePlayer();
         void displayFPS();
+        sf::Vector2f getPlayerCentre();
 };
 #endif

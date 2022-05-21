@@ -6,6 +6,7 @@ Raycast::Raycast(){
     if (this->LOADGRID) { this->loadGrid(); }
     this->border();
     this->initPlayer();
+    this->getMousePos();
     this->initRays();
     this->deltaClock.restart();
     this->prevTime = this->deltaClock.getElapsedTime();
@@ -27,10 +28,10 @@ void Raycast::update(){
     this->updatePlayer();
     this->updateRays();
     int n = (sizeof(this->rays)/sizeof(*this->rays));
-    rotateRays(n, rays);
+    //rotateRays(n, rays);
     //rotateRaysCPU(n, rays);
     int N = sizeof(this->grid) / sizeof(*this->grid);
-    getCollisionDistance(this->WIDTH/this->BLOCKSIZE, this->BLOCKSIZE, n, this->rays, this->grid, this->collisions);
+    //getCollisionDistance(this->WIDTH/this->BLOCKSIZE, this->BLOCKSIZE, n, this->rays, this->grid, this->collisions);
     //for (int i = 0; i < n; i++){
     //    this->collisions[i] = i + 20.0;
     //}
@@ -89,12 +90,6 @@ void Raycast::initRays(){
     playerCentre.y += this->BLOCKSIZE / 2;
     int rayCount = 0;
     Ray tempRay;
-    tempRay.ox = playerCentre.x;
-    tempRay.oy = playerCentre.y;
-    tempRay.px = this->mouse_pos.x;
-    tempRay.py = this->mouse_pos.y;
-    tempRay.m = 0;
-    tempRay.c = 0;
     for (float i = (360 - (this->CONEANGLE/ 2)); i < 360; i += this->DEGSTEP){
         tempRay.angle = i;
         this->rays[rayCount++] = tempRay;
@@ -143,6 +138,43 @@ void Raycast::getMousePos(){
     this->mouse_pos = sf::Mouse::getPosition(*this->window);
 }
 
+float Raycast::angleBetween(sf::Vector2i two, sf::Vector2i three, sf::Vector2f one){
+    /*
+    sf::Vector2f a = sf::Vector2f(mp1.x - pp.x, mp1.y - pp.y);
+    sf::Vector2f b = sf::Vector2f(mp2.x - pp.x, mp2.y - pp.y);
+    float dot = (a.x*b.x + a.y*b.y);
+    //std::cout<<dot<<'\n';
+    float maga = sqrt(a.x*a.x+a.y*a.y);
+    //std::cout<<maga<<'\n';
+    float magb = sqrt(b.x*b.x+b.y*b.y);
+    //std::cout<<magb<<'\n';
+    float val = dot / (maga * magb);
+    //float o = 1.0;
+    //val = std::modf(val, o);
+    float angle = std::acos(val);
+    std::cout<<angle<<'\n';
+    return angle;
+    */
+   float p12 = sqrt((one.x - two.x) * (one.x - two.x) + (one.y - two.y) * (one.y - two.y));
+   float p13 = sqrt((one.x - three.x) * (one.x - three.x) + (one.y - three.y) * (one.y - three.y));
+   float p23 = sqrt((two.x - three.x) * (two.x - three.x) + (two.y - three.y) * (two.y - three.y));
+   float angle = acos((p12*p12 + p13*p13 - p23*p23) / ( 2 * p12 * p13));
+   float posOrNeg = (three.x - two.x) * (three.y - two.y);
+   //angle *= (posOrNeg > 0) ? 1 : -1;
+   return angle;
+}
+
+void Raycast::updateRays(){
+    sf::Vector2i mp = this->mouse_pos;
+    this->getMousePos();
+    float angle = this->angleBetween(mp, this->mouse_pos, this->getPlayerCentre());
+    angle = this->radToDeg(angle);
+    for (auto& r : this->rays){
+        r.angle += angle;
+    }
+}
+
+/*
 void Raycast::updateRays(){
     sf::Vector2f playerCentre = this->player.getPosition();
     this->getMousePos();
@@ -156,13 +188,24 @@ void Raycast::updateRays(){
         r.py = this->mouse_pos.y;
     }
 }
+*/
+
+float Raycast::degToRad(float& angle){
+    return (angle * PI) / 180;
+}
+
+float Raycast::radToDeg(float& angle){
+    return (angle * 180) / PI;
+}
 
 void Raycast::drawRays(){
     int f = 0;
+    sf::Vector2f playerPos = getPlayerCentre();
     for (auto& r : this->rays){
+        sf::Vector2f rayEnd = playerPos + sf::Vector2f(r.mag * cos(this->degToRad(r.angle)), r.mag * sin(this->degToRad(r.angle)));
         sf::Vertex line[] = {
-            sf::Vertex(sf::Vector2f(r.ox, r.oy), sf::Color::Red), 
-            sf::Vertex(sf::Vector2f(r.px, r.py), sf::Color::Red)
+            sf::Vertex(playerPos, sf::Color::Red), 
+            sf::Vertex(rayEnd, sf::Color::Red)
             //sf::Vertex(sf::Vector2f(r.ox + f, r.oy + f), sf::Color::Red)
         };
         f++;
@@ -224,4 +267,9 @@ float Raycast::getDegStep(){
 
 float Raycast::getConeAngle(){
     return this->CONEANGLE;
+}
+
+sf::Vector2f Raycast::getPlayerCentre(){
+    sf::Vector2f pos = this->player.getPosition();
+    return sf::Vector2f(pos.x + this->BLOCKSIZE / 2, pos.y + this->BLOCKSIZE / 2);
 }

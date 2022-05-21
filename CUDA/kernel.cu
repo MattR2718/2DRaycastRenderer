@@ -1,5 +1,6 @@
 #include "kernel.cuh"
 
+/*
 void rotateRaysCPU(int& n, Ray *rays){
     const float PI = 3.1415;
     for (int i = 0; i < n; i++){
@@ -173,3 +174,13 @@ void getCollisionDistance(int wGrid, int bs, int nRays, Ray *rays, bool *grid, f
     //printf("FREED\n");
     //printf("odijoidfjgoijog");
 }
+
+*/
+/*
+void rotateRaysCPU(int& n, Ray *rays){
+    const float PI = 3.1415;
+    for (int i = 0; i < n; i++){
+
+    }
+}
+*/
